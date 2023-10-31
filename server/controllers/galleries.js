@@ -1,10 +1,10 @@
-import Gallery from '../models/gallery.js';
+import GalleryMessage from '../models/galleryMessage.js';
 
-export const getGallery = async (req, res) => {
+export const getGalleries = async (req, res) => {
     try {
-        const pictures = await Gallery.find();
+        const galleryMessages = await GalleryMessage.find();
        
-        res.status(200).json(pictures);
+        res.status(200).json(galleryMessages);
 
     } catch (error) {
         res.status(404).json({message: error.message});
@@ -14,7 +14,7 @@ export const getGallery = async (req, res) => {
 export const createGallery = async (req, res) => {
     const gallery = req.body;
 
-    const newGallery = new Gallery(gallery);
+    const newGallery = new GalleryMessage(gallery);
 
     try {
         await newGallery.save();

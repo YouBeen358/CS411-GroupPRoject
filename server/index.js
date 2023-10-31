@@ -8,7 +8,7 @@ import galleryRoutes from './routes/galleries.js';
 
 const app = express();
 
-app.use('/gallery', galleryRoutes);
+app.use('/galleries', galleryRoutes);
 
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));

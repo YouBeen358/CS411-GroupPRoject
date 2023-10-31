@@ -1,11 +1,11 @@
 import express from 'express';
-import { getGallery, createGallery} from '../controllers/galleries.js'
+
+import { getGalleries, createGallery} from '../controllers/galleries.js'
 
 const router = express.Router();
 
-router.get('/', getGallery);
+router.get('/', getGalleries);
 router.post('/', createGallery);
-
 
 
 export default router;
