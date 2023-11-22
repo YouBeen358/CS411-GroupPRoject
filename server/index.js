@@ -1,25 +1,36 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import mongoose from 'mongoose';
-import cors from 'cors';
+const express = require("express")
+const mongoose = require('mongoose')
+const cors = require("cors")
+const UserModel = require('./models/User')
 
+const app = express()
+app.use(express.json())
+app.use(cors())
 
-import galleryRoutes from './routes/galleries.js';
+mongoose.connect("mongodb+srv://vhwang:vhwang@styleme.ac7anh6.mongodb.net/")
 
-const app = express();
+app.post('/login', (req, res) => {
+    const {email, password} = req.body;
+    UserModel.findOne({email: email})
+    .then(user=> {
+        if(user){
+            if(user.password == password){
+                res.json("Success")
+            } else {
+                res.json("The password is incorrect")
+            }
+        } else {
+            res.json("No record exists")
+        }
+    })
+})
 
-app.use('/galleries', galleryRoutes);
+app.post('/register', (req,res) => {
+    UserModel.create(req.body)
+    .then(users => res.json(users))
+    .catch(err => res.json(err))
+})
 
-app.use(bodyParser.json({ limit: "30mb", extended: true }));
-app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors());
-
-const CONNECTION_URL = "mongodb+srv://vhwang:vhwang@styleme.ac7anh6.mongodb.net/?retryWrites=true&w=majority";
-const PORT = process.env.PORT || 5000;
-
-mongoose.connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => app.listen(PORT, () => console.log(`Server Running on Port: ${PORT}`)))
-    .catch((error) => console.log(error.message));
-    
-//mongoose.set('useFindAndModify', false);
-
+app.listen(3001, () => {
+    console.log("Server is Running")
+})
