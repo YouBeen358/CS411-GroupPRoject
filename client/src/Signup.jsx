@@ -1,7 +1,7 @@
 import { useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css'
 import axios from 'axios'
-import {Link, useNavigate} from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
 
 
@@ -16,8 +16,9 @@ function Signup() {
     const handleSubmit = (e) => {
         e.preventDefault()
         axios.post('http://localhost:3001/register', {name, email, password, city, style})
-        .then(result => {console.log(result)
-            navigate('/login')
+        .then(result => {
+            console.log(result);
+            navigate('/home',{ state: { user: result.data } });
         })
         .catch(err => console.log(err))
     }
