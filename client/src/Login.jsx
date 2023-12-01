@@ -11,21 +11,25 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setErrorMessage(''); // Reset error message on new submission
+    setErrorMessage('');
+
+    console.log('Login credentials:', { email, password });
 
     axios.post('http://localhost:3001/login', { email, password })
-      .then(result => {
-        console.log(result);
-        if (result.data === 'Success') {
-          navigate('/home');
-        } else {
-          setErrorMessage('Login failed. Please check your credentials and try again.');
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        setErrorMessage('An error occurred. Please try again later.');
-      });
+        .then(result => {
+            if (result.data.success) {
+                const user = result.data.user;
+                console.log(user);
+                navigate('/home', { state: { user } });
+            } else {
+                
+                setErrorMessage(result.data.message || 'Login failed. Please check your credentials and try again.');
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            setErrorMessage('An error occurred. Please try again later.');
+        });
   };
 
   return (
