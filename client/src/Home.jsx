@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 
+//updated home
 function Home() {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +26,7 @@ function Home() {
       });
   }, [user.city, apiKey]);
 
- 
+
 
   return (
     <div>
