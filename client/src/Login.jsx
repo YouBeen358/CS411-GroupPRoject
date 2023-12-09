@@ -16,20 +16,20 @@ function Login() {
     console.log('Login credentials:', { email, password });
 
     axios.post('http://localhost:3001/login', { email, password })
-        .then(result => {
-            if (result.data.success) {
-                const user = result.data.user;
-                console.log(user);
-                navigate('/home', { state: { user } });
-            } else {
-                
-                setErrorMessage(result.data.message || 'Login failed. Please check your credentials and try again.');
-            }
-        })
-        .catch(error => {
-            console.log(error);
-            setErrorMessage('An error occurred. Please try again later.');
-        });
+      .then(result => {
+        if (result.data.success) {
+          const user = result.data.user;
+          console.log(user);
+          navigate('/home', { state: { user } });
+        } else {
+
+          setErrorMessage(result.data.message || 'Login failed. Please check your credentials and try again.');
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        setErrorMessage('An error occurred. Please try again later.');
+      });
   };
 
   return (
@@ -66,6 +66,10 @@ function Login() {
           <button type="submit" className="btn btn-success w-100 rounded-0" style={{ backgroundColor: 'pink', border: 'none' }}>
             Login
           </button>
+          <p>
+            Don't have an account?
+            <Link to="/register" className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none">Sign up</Link>
+          </p>
         </form>
       </div>
     </div>
