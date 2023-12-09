@@ -15,7 +15,7 @@ mongoose.connect("mongodb+srv://vhwang:vhwang@styleme.ac7anh6.mongodb.net/")
 // Add a new endpoint to fetch user information by email
 app.get('/user/:email', async (req, res) => {
     const email = req.params.email;
-    
+
     try {
         const user = await UserModel.findOne({ email: email });
 
@@ -33,27 +33,27 @@ app.get('/user/:email', async (req, res) => {
 
 app.post('/saveUserData', async (req, res) => {
     const { givenName, email } = req.body;
-  
+
     // Assuming you want to save the given_name as the 'name' field
     const newUser = new UserModel({
-      name: givenName,
-      email,
-      // You can decide how to handle the password, city, and style fields based on your requirements
-      // For simplicity, you can set them to default values or leave them empty
-      password: 'defaultPassword',
-      city: 'defaultCity',
-      style: 'defaultStyle',
+        name: givenName,
+        email,
+        // You can decide how to handle the password, city, and style fields based on your requirements
+        // For simplicity, you can set them to default values or leave them empty
+        password: 'defaultPassword',
+        city: 'defaultCity',
+        style: 'defaultStyle',
     });
-  
+
     try {
-      await newUser.save();
-      res.status(201).send('User data saved successfully.');
+        await newUser.save();
+        res.status(201).send('User data saved successfully.');
     } catch (error) {
-      console.error('Error saving user data:', error);
-      res.status(500).send('Internal Server Error');
+        console.error('Error saving user data:', error);
+        res.status(500).send('Internal Server Error');
     }
-  });
-  
+});
+
 
 
 // Update the /login endpoint
@@ -120,9 +120,35 @@ app.get('/user/:email', (req, res) => {
 });
 
 
-  
-  
-  
+app.get('/outfits/:email', async (req, res) => {
+    const email = req.params.email;
+
+    try {
+        const user = await UserModel.findOne({ email: email });
+
+        if (user) {
+            const { city } = user;
+            // Fetch weather data based on user's city
+            const weatherResponse = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${user.city}&units=imperial&appid=${apiKey}`);
+            const weatherData = weatherResponse.data;
+
+            // Construct a query for outfit based on weather data
+            const query = `outfit for ${weatherData.main.temp}°F ${weatherData.weather[0].description}`;
+
+            // Fetch outfit search results using Custom Search API
+            const searchResponse = await axios.get(`https://www.googleapis.com/customsearch/v1?key=${searchEngineId}&cx=017576662512468239146:omuauf_lfve&q=${query}`);
+            const outfitResults = searchResponse.data.items || [];
+
+            res.json({ user, weather: weatherData, outfits: outfitResults });
+        } else {
+            res.status(404).json({ message: "User not found" });
+        }
+    } catch (err) {
+        console.error('Error fetching outfits:', err);
+        res.status(500).json({ message: "An error occurred. Please try again later." });
+    }
+});
+
 
 app.listen(3001, () => {
     console.log("Server is Running")
