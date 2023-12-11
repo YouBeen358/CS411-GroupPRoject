@@ -9,6 +9,8 @@ function GoogleRegistration() {
   const [signedUp, setSignedUp] = useState(false);
   const [city, setCity] = useState("");
   const [style, setStyle] = useState("");
+  const [gender, setGender] = useState("");
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,6 +20,7 @@ function GoogleRegistration() {
       email: userInfo.email,
       city,
       style,
+      gender,
     };
 
     try {
@@ -31,7 +34,7 @@ function GoogleRegistration() {
 
   async function createUserOnServer(decodedToken) {
     const serverEndpoint = 'http://localhost:3001/saveUserData';
-
+  
     try {
       const response = await fetch(serverEndpoint, {
         method: 'POST',
@@ -41,9 +44,11 @@ function GoogleRegistration() {
         body: JSON.stringify({
           email: decodedToken.email,
           givenName: decodedToken.given_name,
+          // Include gender field in the request
+          gender,
         }),
       });
-
+  
       if (response.ok) {
         console.log('User data saved on the server successfully.');
         setSignedUp(true);
@@ -54,6 +59,7 @@ function GoogleRegistration() {
       console.error('Error while communicating with the server:', error);
     }
   }
+  
 
   function handleCallbackResponse(response) {
     console.log("Encoded JWT ID token: " + response.credential);
@@ -88,6 +94,10 @@ function GoogleRegistration() {
     setStyle(eventKey);
   };
 
+  const handleGenderSelect = (eventKey) => {
+    setGender(eventKey);
+  };
+
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-gray">
       <div className="text-center p-4 rounded bg-white">
@@ -113,6 +123,19 @@ function GoogleRegistration() {
                 onChange={(e) => setCity(e.target.value)}
               />
             </div>
+
+            <label htmlFor="gender" className="form-label text-dark">
+                <strong>Gender</strong>
+              </label>
+            <DropdownButton
+              title={gender || 'Select Gender'}
+              onSelect={handleGenderSelect}
+              className="w-100 mb-3"
+            >
+              <Dropdown.Item eventKey="male">Male</Dropdown.Item>
+              <Dropdown.Item eventKey="female">Female</Dropdown.Item>
+              <Dropdown.Item eventKey="androgynous">Androgynous</Dropdown.Item>
+            </DropdownButton>
             <div className="mb-3">
               <label htmlFor="style" className="form-label text-dark">
                 <strong>Style</strong>
