@@ -90,41 +90,48 @@ function GoogleLogin() {
       }
     }
   };
-  
-  
 
   useEffect(() => {
     handleLogin();
   }, []);
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-gray">
+    <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: '#E6E6FA' }}>
       <div className="text-center p-4 rounded bg-white">
-        <div id="loginDiv"></div>
+        {/* Banner and Message */}
+        <div className="mb-4">
+          <h2 style={{ color: '#FF69B4' }}> Welcome back! Sign in to see your outfits!</h2>
+        </div>
+
+        <div className="d-flex justify-content-center mb-3">
+          <div id="loginDiv"></div>
+        </div>
+        
         {userInfo && (
           <div>
             <p>Hello {userInfo.given_name}. Your email is {userInfo.email}.</p>
             <img src={userInfo.picture} alt="Profile" className="rounded-circle" />
           </div>
         )}
+
         {userNotFound && (
           <div>
             <p>You don't have an account. Please register first.</p>
             <button
-                onClick={() => navigate('/registerwithgoogle')}
-                className="btn btn-success rounded-0"
-                style={{
-                  backgroundColor: 'pink',
-                  border: 'none',
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                }}
-              >
-                Register
-          </button>
+              onClick={() => navigate('/registerwithgoogle')}
+              className="btn btn-success rounded-0"
+              style={{
+                backgroundColor: 'pink',
+                border: 'none',
+                padding: '10px 20px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                borderRadius: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              Register
+            </button>
           </div>
         )}
       </div>
