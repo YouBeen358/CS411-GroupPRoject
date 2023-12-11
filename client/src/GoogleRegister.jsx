@@ -62,11 +62,11 @@ function GoogleRegistration() {
   
 
   function handleCallbackResponse(response) {
-    console.log("Encoded JWT ID token: " + response.credential);
+    //console.log("Encoded JWT ID token: " + response.credential);
 
     try {
       const decodedToken = jwtDecode(response.credential);
-      console.log('Decoded JWT ID token:', decodedToken);
+      //console.log('Decoded JWT ID token:', decodedToken);
       setUserInfo(decodedToken);
       createUserOnServer(decodedToken);
     } catch (error) {
