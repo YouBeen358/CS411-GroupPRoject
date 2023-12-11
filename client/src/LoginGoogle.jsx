@@ -5,11 +5,11 @@ import axios from 'axios';
 
 function GoogleLogin() {
   const [userInfo, setUserInfo] = useState(null);
+  const [userNotFound, setUserNotFound] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      // Wait for the Google Sign-In API script to be loaded
       await new Promise((resolve) => {
         const script = document.createElement('script');
         script.src = 'https://apis.google.com/js/platform.js';
@@ -18,14 +18,12 @@ function GoogleLogin() {
         script.onload = resolve;
         document.head.appendChild(script);
       });
-  
-      // Initialize Google Sign-In
+
       google.accounts.id.initialize({
         client_id: '698726625190-41vi7mvqele9t2p7m99m63ra5j3mtj3g.apps.googleusercontent.com',
         callback: handleCallbackResponse,
       });
-  
-      // Render the Google Sign-In button
+
       google.accounts.id.renderButton(
         document.getElementById('loginDiv'),
         { theme: 'outline', size: 'large' }
@@ -34,16 +32,12 @@ function GoogleLogin() {
       console.error('Error initializing Google Sign-In:', error);
     }
   };
-  
-  const handleCallbackResponse = (response) => {
-    console.log("Encoded JWT ID token: " + response.credential);
 
+  const handleCallbackResponse = (response) => {
     try {
       const decodedToken = jwtDecode(response.credential);
-      console.log('Decoded JWT ID token:', decodedToken);
       setUserInfo(decodedToken);
 
-      // Use the email from Google OAuth to fetch user info from your server
       fetchUserInfo(decodedToken.email);
     } catch (error) {
       if (error instanceof InvalidTokenError) {
@@ -57,17 +51,47 @@ function GoogleLogin() {
   const fetchUserInfo = async (email) => {
     try {
       const response = await axios.get(`http://localhost:3001/user/${email}`);
-      
+  
       if (response.data) {
+        // User found, navigate to home
         const userData = response.data;
         navigate('/home', { state: { user: userData } });
       } else {
-        console.error('User not found.');
+        // User not found, suggest registration
+        const confirmSignUp = window.confirm('You don\'t have an account. Do you want to sign up?');
+  
+        if (confirmSignUp) {
+          // Create a new user and navigate to home
+          const newUserResponse = await axios.post('http://localhost:3001/register', {
+            email,
+            city: 'defaultCity',
+            style: 'defaultStyle',
+            gender: 'defaultGender',
+          });
+  
+          if (newUserResponse.data) {
+            const newUser = newUserResponse.data;
+            navigate('/home', { state: { user: newUser } });
+          } else {
+            console.error('Error creating a new user.');
+          }
+        } else {
+          // User chose not to sign up
+          console.log('User chose not to sign up.');
+        }
       }
     } catch (error) {
-      console.error('Error fetching user info:', error);
+      if (error.response && error.response.status === 404) {
+        // Handle 404 error when user is not found
+        setUserNotFound(true);
+      } else {
+        // Handle other errors
+        console.error('Error fetching user info:', error);
+      }
     }
   };
+  
+  
 
   useEffect(() => {
     handleLogin();
@@ -81,6 +105,26 @@ function GoogleLogin() {
           <div>
             <p>Hello {userInfo.given_name}. Your email is {userInfo.email}.</p>
             <img src={userInfo.picture} alt="Profile" className="rounded-circle" />
+          </div>
+        )}
+        {userNotFound && (
+          <div>
+            <p>You don't have an account. Please register first.</p>
+            <button
+                onClick={() => navigate('/registerwithgoogle')}
+                className="btn btn-success rounded-0"
+                style={{
+                  backgroundColor: 'pink',
+                  border: 'none',
+                  padding: '10px 20px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                }}
+              >
+                Register
+          </button>
           </div>
         )}
       </div>
