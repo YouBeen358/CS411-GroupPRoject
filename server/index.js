@@ -2,6 +2,7 @@ const express = require("express")
 const mongoose = require('mongoose')
 const cors = require("cors")
 const UserModel = require('./models/User')
+const axios = require('axios')
 
 
 
@@ -43,6 +44,7 @@ app.post('/saveUserData', async (req, res) => {
         password: 'defaultPassword',
         city: 'defaultCity',
         style: 'defaultStyle',
+        gender: 'defaultGender',
     });
 
     try {
@@ -76,7 +78,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const { email, city, style } = req.body;
+    const { email, city, style, gender } = req.body;
 
     try {
         // Check if the user already exists in the database
@@ -84,16 +86,18 @@ app.post('/register', async (req, res) => {
 
         if (existingUser) {
             // If the user exists, update their information
-            existingUser.city = city || existingUser.city; // Use the new value if provided, otherwise keep the existing value
+            existingUser.city = city || existingUser.city;
             existingUser.style = style || existingUser.style;
+            existingUser.gender = gender || existingUser.gender; // Update the gender field
             await existingUser.save();
             res.json(existingUser);
         } else {
             // If the user does not exist, create a new user
             const newUser = new UserModel({
                 email,
-                city: city || 'defaultCity', // Set default values if not provided
+                city: city || 'defaultCity',
                 style: style || 'defaultStyle',
+                gender: gender || 'defaultGender', // Set default value for gender
             });
             await newUser.save();
             res.json(newUser);
@@ -103,6 +107,7 @@ app.post('/register', async (req, res) => {
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+
 
 
 // New endpoint to fetch user information by email
@@ -119,35 +124,6 @@ app.get('/user/:email', (req, res) => {
         .catch(err => res.status(500).json({ message: "An error occurred. Please try again later." }));
 });
 
-
-app.get('/outfits/:email', async (req, res) => {
-    const email = req.params.email;
-
-    try {
-        const user = await UserModel.findOne({ email: email });
-
-        if (user) {
-            const { city } = user;
-            // Fetch weather data based on user's city
-            const weatherResponse = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${user.city}&units=imperial&appid=${apiKey}`);
-            const weatherData = weatherResponse.data;
-
-            // Construct a query for outfit based on weather data
-            const query = `outfit for ${weatherData.main.temp}°F ${weatherData.weather[0].description}`;
-
-            // Fetch outfit search results using Custom Search API
-            const searchResponse = await axios.get(`https://www.googleapis.com/customsearch/v1?key=${searchEngineId}&cx=017576662512468239146:omuauf_lfve&q=${query}`);
-            const outfitResults = searchResponse.data.items || [];
-
-            res.json({ user, weather: weatherData, outfits: outfitResults });
-        } else {
-            res.status(404).json({ message: "User not found" });
-        }
-    } catch (err) {
-        console.error('Error fetching outfits:', err);
-        res.status(500).json({ message: "An error occurred. Please try again later." });
-    }
-});
 
 
 app.listen(3001, () => {
