@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 function Home() {
   const [weather, setWeather] = useState(null);
+  const [outfitImage, setOutfitImage] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [outfit, setOutfit] = useState(null);
-  const [loadingOutfit, setLoadingOutfit] = useState(true);
 
-
-  // Replace 'YOUR_API_KEY' with your actual OpenWeatherMap API key
   const apiKey = 'f024fc3e6c4533d76d2b2af2aa9f4138';
-  const userCity = 'London'; // You can replace this with the user's city from the database
+  const searchKey = 'AIzaSyAxVT41lWbqfEPkFVdPK7qc7ZZYOFQWlv0';
+  const searchEngineId = '5258205347cad49d4';
 
-  const searchEngineId = 'AIzaSyAxq4eeoFiZ_cJSCh4w4T3lz77kHvv0oEo'
+  const location = useLocation();
+  const user = location.state.user;
 
   useEffect(() => {
     // Fetch weather data when the component mounts
-    axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${userCity}&appid=${apiKey}`)
+    axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${user.city}&units=imperial&appid=${apiKey}`)
       .then(response => {
         setWeather(response.data);
         setLoading(false);
@@ -25,58 +25,60 @@ function Home() {
         console.error('Error fetching weather data:', error);
         setLoading(false);
       });
-  }, [userCity, apiKey]);
+  }, [user.city, apiKey]);
 
   useEffect(() => {
-    if (weather) {
-      // const query = `outfit for ${weather.main.temp}°F ${weather.weather[0].description}`;
-      const query = `outfit for ${weather.main.temp}°F`;
-      axios.get(`https://www.googleapis.com/customsearch/v1?key=${searchEngineId}&cx=017576662512468239146:omuauf_lfve&q=${query}`)
+    // Only make the Google Custom Search API request if both weather and user are available
+    if (weather && user) {
+      // Specify the site restriction to Google
+      const siteRestriction = 'site:pinterest.com OR site:polyvore.com';
+  
+      // Modify the search query to include weather description, user's style, gender, and the term "outfit"
+      const searchQuery = `${weather.weather[0].description} ${user.style} ${user.gender} fashion outfit ${siteRestriction}`;
+  
+      // Fetch images related to the updated search query from the Google Custom Search API
+      axios.get(`https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&cx=${searchEngineId}&key=${searchKey}&searchType=image`)
         .then(response => {
-          console.log('Outfit data:', response.data)
-          setOutfit(response.data || []);
-          setLoadingOutfit(false);
+          console.log('Google API response:', response.data);
+  
+          if (response.data.items && response.data.items.length > 0) {
+            // Randomly select an image from the response
+            const randomIndex = Math.floor(Math.random() * response.data.items.length);
+            const imageLink = response.data.items[randomIndex].link;
+            console.log('Image link:', imageLink);
+            setOutfitImage(imageLink);
+          } else {
+            console.error('No items found in the API response.');
+          }
         })
         .catch(error => {
-          console.error('Error fetching outfit data:', error);
-          setLoadingOutfit(false);
+          console.error('Error fetching outfit image:', error);
         });
     }
-  }, [weather, searchEngineId]);
-
+  }, [user, weather, searchEngineId, searchKey]);
+  
 
   return (
     <div>
-      <h2>WELCOME, HERE ARE YOUR OUTFITS OF THE DAY</h2>
+      <h2>Welcome, {user.name}! Here are your outfits of the day!</h2>
       {loading ? (
         <p>Loading weather data...</p>
       ) : (
-        weather && (
-          <div>
-            <h3>Weather in {userCity}</h3>
-            <p>Temperature: {weather.main.temp}°F</p>
-            <p>Description: {weather.weather[0].description}</p>
-            {/* Add more weather information as needed */}
-          </div>
-        )
-      )}
+        <div>
+          <h3>Weather in {user.city}</h3>
+          <p>Temperature: {weather && weather.main.temp}°F</p>
+          <p>Today's weather is {weather && weather.weather[0].description}!</p>
 
-      {loadingOutfit ? (
-        <p>Loading outfit data...</p>
-      ) : (
-        outfit && outfit.items ? (
-          <div>
-            <h3>Outfit of the day</h3>
-            <p>Here is your outfit for today!</p>
-            <img src={outfit.items[0].link} alt={outfit.items[0].title} />
-            <p>{outfit.items[0].title}</p>
-            {/* Add more outfit information as needed */}
-          </div>
-        ) : (
-          <p>No outfit found for the current weather</p>
-        )
+          {/* Display the outfit image if available */}
+          {outfitImage && (
+            <div>
+              <h3>{user.style} Outfit Inspiration</h3>
+              <img src={outfitImage} alt={`${user.style} Outfit`} style={{ maxWidth: '50%' }} />
+            </div>
+          )}
+        </div>
       )}
-    </div >
+    </div>
   );
 }
 
