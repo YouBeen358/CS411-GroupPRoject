@@ -92,21 +92,15 @@ app.post('/register', async (req, res) => {
             await existingUser.save();
             res.json(existingUser);
         } else {
-            // If the user does not exist, create a new user
-            const newUser = new UserModel({
-                email,
-                city: city || 'defaultCity',
-                style: style || 'defaultStyle',
-                gender: gender || 'defaultGender', // Set default value for gender
-            });
-            await newUser.save();
-            res.json(newUser);
+            // If the user does not exist, return an error (or create a new user if that's the desired behavior)
+            res.status(404).json({ message: 'User not found. Please sign up first.' });
         }
     } catch (err) {
         console.error('Error registering user:', err);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 });
+
 
 
 
