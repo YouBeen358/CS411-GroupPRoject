@@ -62,7 +62,7 @@ function GoogleRegistration() {
 
 
     function handleCallbackResponse(response) {
-        //console.log("Encoded JWT ID token: " + response.credential);
+        //console.fdfdslog("Encoded JWT ID token: " + response.credential);
 
         try {
             const decodedToken = jwtDecode(response.credential);
