@@ -130,15 +130,15 @@ function Home() {
                     {(outfitImage1 || outfitImage2) && (
                         <div className="d-flex justify-content-between">
                             {outfitImage1 && (
-                                <div style={{ marginRight: '5px' }}>
+                                <div style={{ marginRight: '5px', width: '200px', maxHeight: '300px', overflow: 'hidden' }}>
                                     <h3>Outfit 1</h3>
-                                    <img src={outfitImage1} alt={`${user.style} Outfit 1`} style={{ maxWidth: '50%' }} />
+                                    <img src={outfitImage1} alt={`${user.style} Outfit 1`} style={{ width: '100%', height: 'auto', borderRadius: '5px' }} />
                                 </div>
                             )}
                             {outfitImage2 && (
-                                <div>
+                                <div style={{ width: '200px', maxHeight: '300px', overflow: 'hidden' }}>
                                     <h3>Outfit 2</h3>
-                                    <img src={outfitImage2} alt={`${user.style} Outfit 2`} style={{ maxWidth: '50%' }} />
+                                    <img src={outfitImage2} alt={`${user.style} Outfit 2`} style={{ width: '100%', height: 'auto', borderRadius: '5px' }} />
                                 </div>
                             )}
                         </div>
